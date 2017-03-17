@@ -52,14 +52,24 @@ public class InitializeIntegrity
 		
 		for(File file : fileSet)
 		{
+			if(!file.canRead())
+			{
+				log.warn("Cannot read file : " + file.getAbsolutePath());
+				continue;
+			}
+			
 			String hashValue = CheckSum.getCheckSum(file);
-			try 
+			
+			if(hashValue != null)
 			{
-				idb.insert(file.getAbsolutePath(), hashValue, file.length());
-			} 
-			catch (Exception e) 
-			{
-				log.error("Error while inserting record", e);
+				try 
+				{
+					idb.insert(file.getAbsolutePath(), hashValue, file.length());
+				} 
+				catch (Exception e) 
+				{
+					log.error("Error while inserting record", e);
+				}
 			}
 			
 			noOfFilesProcessed++;

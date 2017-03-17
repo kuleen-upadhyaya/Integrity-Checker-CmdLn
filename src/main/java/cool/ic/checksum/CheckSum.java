@@ -41,7 +41,8 @@ public class CheckSum
 		catch (FileNotFoundException e)
 		{
 			log.error("File not found : " + fileName, e);
-			System.exit(0);
+			return null;
+			//System.exit(0);
 		}
 
 		byte[] dataBytes = new byte[1024];
