@@ -1,11 +1,11 @@
 package cool.ic.progress;
 public class ConsoleProgressBar 
 {
-    public static void showProgress(int percentage, long processedFileSize, long totalFileSize)
+    public static void showProgress(int percentage, long processedFileSize, long totalFileSize, long processedMB, long totalMB)
     {
-    	int progressBarMaxLength = 40;
-    	char progressBarDarkChar = 219;
-    	char progressBarLightChar = 176;
+    	final int progressBarMaxLength = 20;
+    	final char progressBarDarkChar = '#';
+    	final char progressBarLightChar = ' ';
     	
     	System.out.print("\r[");
     	
@@ -23,6 +23,6 @@ public class ConsoleProgressBar
     	
     	System.out.print("]");
 
-    	System.out.printf(" %3s %% Files Processed : %d/%d", percentage, processedFileSize, totalFileSize);
+    	System.out.printf(" %3s %% Files Processed : %d/%d %d/%d MB", percentage, processedFileSize, totalFileSize, processedMB, totalMB);
     }
 }
