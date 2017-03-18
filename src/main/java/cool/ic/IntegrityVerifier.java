@@ -14,6 +14,7 @@ import cool.ic.beans.IntegrityDBDetails;
 import cool.ic.checksum.CheckSum;
 import cool.ic.db.IntegrityDB;
 import cool.ic.progress.ConsoleProgressBar;
+import cool.ic.utils.Commons;
 
 public class IntegrityVerifier 
 {
@@ -21,6 +22,8 @@ public class IntegrityVerifier
 
 	public void verifyIntegrity() 
 	{
+		long startTime = System.nanoTime();
+		
 		log.info("Preparing list from Integrity DB");
 		
 		IntegrityDB idb = new IntegrityDB();
@@ -32,7 +35,6 @@ public class IntegrityVerifier
 		
 		log.info("Comparing DB entries with file system entries");
 		Set <String> deletedFilesFromFileSystem = compareDBWithFileSystemEntries(dbMap, fileSet);
-		
 		
 		log.info("Comparing file system entries with DB entries");
 		Set <String> newFilesInFileSystem = compareFileSystemEntriesWithDB(fileSet, dbMap);
@@ -58,6 +60,14 @@ public class IntegrityVerifier
 		{
 			log.info(fileName);
 		}
+		
+		long endTime = System.nanoTime();
+		
+		String totalTimeTaken = Commons.getTimeString(startTime, endTime);
+		
+		log.info(totalTimeTaken);
+		System.out.println("\n\n" + totalTimeTaken);
+
 	}
 
 	private Set<String> checkIntegrityForRestOfTheFiles(
@@ -75,6 +85,8 @@ public class IntegrityVerifier
 		int noOfFilesProcessed=0;
 		int totalNoOfFiles = fileSet.size();
 		long totalFileSize = getTotalFileSize(dbMap);
+		long totalFileSizeMB = Commons.toMB(totalFileSize);
+		int percentage = 0;
 		
 		for(String fileName : dbSet)
 		{
@@ -90,9 +102,12 @@ public class IntegrityVerifier
 			noOfFilesProcessed++;
 			processedFileSize += idb.getFileSize();
 			
-			int percentage = (int) (processedFileSize * 100l / totalFileSize);
-			ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles);
+			percentage = (int) (processedFileSize * 100l / totalFileSize);
+			ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
 		}
+
+		percentage = (int) (processedFileSize * 100l / totalFileSize);
+		ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
 		
 		return filesWithDifferentHashValue;
 	}

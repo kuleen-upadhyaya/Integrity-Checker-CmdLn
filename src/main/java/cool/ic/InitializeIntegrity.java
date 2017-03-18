@@ -11,6 +11,7 @@ import cool.ic.checksum.CheckSum;
 import cool.ic.db.IntegrityDB;
 import cool.ic.init.InitializationProperties;
 import cool.ic.progress.ConsoleProgressBar;
+import cool.ic.utils.Commons;
 
 public class InitializeIntegrity 
 {
@@ -18,6 +19,8 @@ public class InitializeIntegrity
 	
 	public void initialize() 
 	{
+		long startTime = System.nanoTime();
+		
 		String dbName = InitializationProperties.getDBName();
 		
 		/*Recreate database file if already exists*/
@@ -39,9 +42,9 @@ public class InitializeIntegrity
 		 
 		FileStatistics fs = FileLister.getFileStats();
 		 
-		 Set <File> fileSet = fs.getFileSet();
+		Set <File> fileSet = fs.getFileSet();
 		 
-		 log.info("Files to process : " + fileSet.size());
+		log.info("Files to process : " + fileSet.size());
 
 		log.info("Starting calculation of file checksum");
 		
@@ -49,6 +52,10 @@ public class InitializeIntegrity
 		int noOfFilesProcessed=0;
 		int totalNoOfFiles = fileSet.size();
 		long totalFileSize = fs.getTotalFileSize();
+		long totalFileSizeMB = Commons.toMB(totalFileSize);
+		int percentage = 0;
+		
+		idb.stopAutoCommit();
 		
 		for(File file : fileSet)
 		{
@@ -64,7 +71,7 @@ public class InitializeIntegrity
 			{
 				try 
 				{
-					idb.insert(file.getAbsolutePath(), hashValue, file.length());
+					idb.insertAddBatch(file.getAbsolutePath(), hashValue, file.length());
 				} 
 				catch (Exception e) 
 				{
@@ -75,8 +82,24 @@ public class InitializeIntegrity
 			noOfFilesProcessed++;
 			processedFileSize += file.length();
 			
-			int percentage = (int) (processedFileSize * 100l / totalFileSize);
-			ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles);
+			if(noOfFilesProcessed % 100 == 0)
+			{
+				percentage = (int) (processedFileSize * 100 / totalFileSize);
+				ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
+			}
 		}
+		
+		idb.commit();
+		
+		percentage = (int) (processedFileSize * 100 / totalFileSize);
+		ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
+		
+		long endTime = System.nanoTime();
+		
+		String totalTimeTaken = Commons.getTimeString(startTime, endTime);
+		
+		log.info(totalTimeTaken);
+		System.out.println("\n\n" + totalTimeTaken);
 	}
+
 }
