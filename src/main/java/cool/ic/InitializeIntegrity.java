@@ -86,11 +86,8 @@ public class InitializeIntegrity
 			noOfFilesProcessed++;
 			processedFileSize += file.length();
 			
-			if(noOfFilesProcessed % 100 == 0)
-			{
-				percentage = (int) (processedFileSize * 100 / totalFileSize);
-				ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
-			}
+			percentage = (int) (processedFileSize * 100 / totalFileSize);
+			ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
 		}
 		
 		idb.insertBulk(dbMap);
