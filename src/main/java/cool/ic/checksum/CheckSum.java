@@ -42,7 +42,6 @@ public class CheckSum
 		{
 			log.error("File not found : " + fileName, e);
 			return null;
-			//System.exit(0);
 		}
 
 		byte[] dataBytes = new byte[1024];
@@ -58,8 +57,8 @@ public class CheckSum
 		} 
 		catch (IOException e) 
 		{
-			log.error("Error while reading file", e);
-			System.exit(0);
+			log.error("Error while reading file : " + fileName, e);
+			return null;
 		}
 
 		try
