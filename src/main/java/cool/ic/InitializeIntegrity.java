@@ -55,8 +55,6 @@ public class InitializeIntegrity
 		long totalFileSizeMB = Commons.toMB(totalFileSize);
 		int percentage = 0;
 		
-		idb.stopAutoCommit();
-		
 		for(File file : fileSet)
 		{
 			if(!file.canRead())
@@ -71,7 +69,7 @@ public class InitializeIntegrity
 			{
 				try 
 				{
-					idb.insertAddBatch(file.getAbsolutePath(), hashValue, file.length());
+					idb.insert(file.getAbsolutePath(), hashValue, file.length());
 				} 
 				catch (Exception e) 
 				{
@@ -88,8 +86,6 @@ public class InitializeIntegrity
 				ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
 			}
 		}
-		
-		idb.commit();
 		
 		percentage = (int) (processedFileSize * 100 / totalFileSize);
 		ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
