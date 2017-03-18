@@ -1,12 +1,15 @@
 package cool.ic;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import cool.ic.Files.FileLister;
 import cool.ic.beans.FileStatistics;
+import cool.ic.beans.IntegrityDBDetails;
 import cool.ic.checksum.CheckSum;
 import cool.ic.db.IntegrityDB;
 import cool.ic.init.InitializationProperties;
@@ -20,6 +23,8 @@ public class InitializeIntegrity
 	public void initialize() 
 	{
 		long startTime = System.nanoTime();
+		
+		Map <String, IntegrityDBDetails> dbMap = new HashMap <String, IntegrityDBDetails>();
 		
 		String dbName = InitializationProperties.getDBName();
 		
@@ -69,7 +74,8 @@ public class InitializeIntegrity
 			{
 				try 
 				{
-					idb.insert(file.getAbsolutePath(), hashValue, file.length());
+					IntegrityDBDetails idd = new IntegrityDBDetails(hashValue, "SHA-512", file.length());
+					dbMap.put(file.getAbsolutePath(), idd);
 				} 
 				catch (Exception e) 
 				{
@@ -86,6 +92,8 @@ public class InitializeIntegrity
 				ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
 			}
 		}
+		
+		idb.insertBulk(dbMap);
 		
 		percentage = (int) (processedFileSize * 100 / totalFileSize);
 		ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);

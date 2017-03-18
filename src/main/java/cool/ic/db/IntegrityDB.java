@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -74,20 +75,54 @@ public class IntegrityDB
 		return c;
 	}
 	
-	public void insert(String fileName, String hashValue, long fileSize) throws Exception
+	public void insertBulk(Map<String, IntegrityDBDetails> dbMap)
 	{
 		String insert = "INSERT INTO IntegrityData VALUES (?,?,?,?)";
 		
 		Connection cn = openConnection();
+		PreparedStatement stmt = null;
 		
-		PreparedStatement stmt = cn.prepareStatement(insert);
+		try 
+		{
+			cn.setAutoCommit(false);
+			stmt = cn.prepareStatement(insert);
+		} 
+		catch (SQLException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		stmt.setString(1, fileName);
-		stmt.setString(2, hashValue);
-		stmt.setString(3, "SHA-512");
-		stmt.setLong(4, fileSize);
+		for(Entry <String, IntegrityDBDetails> entry : dbMap.entrySet())
+		{
+			IntegrityDBDetails idb = entry.getValue();
+			
+			try 
+			{
+				stmt.setString(1, entry.getKey());
+				stmt.setString(2, idb.getHashValue());
+				stmt.setString(3, idb.getHashAlgo());
+				stmt.setLong(4, idb.getFileSize());
+				stmt.addBatch();
+			} 
+			catch (SQLException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
-		stmt.executeUpdate();
+		try 
+		{
+			stmt.executeBatch();
+			cn.commit();
+			cn.close();
+		} 
+		catch (SQLException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public Map<String, IntegrityDBDetails> getFileMap() 
@@ -133,6 +168,16 @@ public class IntegrityDB
 		catch (SQLException e) 
 		{
 			Commons.logErrAndExit(log, "Error while iterating result set", e);
+		}
+		
+		try 
+		{
+			cn.close();
+		} 
+		catch (SQLException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return dbMap;
