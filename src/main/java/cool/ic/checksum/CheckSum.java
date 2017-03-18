@@ -8,18 +8,22 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.log4j.Logger;
+
+import cool.ic.commons.Globals;
  
 public class CheckSum 
 {
  
     private static Logger log = Logger.getLogger(CheckSum.class);
-
+    private static long processedFileSize = 0;
+    private static long totalFileSize = 0;
+    
     public static String getCheckSum(String fileName)
     {
     	return getCheckSum(new File(fileName));
     }
     
-	public static String getCheckSum(File fileName) 
+	public static String getCheckSum(File file) 
 	{
 		MessageDigest md = null;
 		try 
@@ -36,28 +40,35 @@ public class CheckSum
 		
 		try 
 		{
-			fis = new FileInputStream(fileName);
+			fis = new FileInputStream(file);
 		}
 		catch (FileNotFoundException e)
 		{
-			log.error("File not found : " + fileName, e);
+			log.error("File not found : " + file, e);
 			return null;
 		}
 
-		byte[] dataBytes = new byte[1024];
-
+		byte[] dataBytes = new byte[16384];
+		
+		totalFileSize = file.length();
+		processedFileSize = 0;
+		
 		int nread = 0;
-
+		
 		try
 		{
 			while ((nread = fis.read(dataBytes)) != -1)
 			{
+				Globals.indvPers = (int)(processedFileSize * 100 / totalFileSize);
 				md.update(dataBytes, 0, nread);
+				processedFileSize += 16384;
 			}
+			
+			Globals.indvPers = 100;
 		} 
 		catch (IOException e) 
 		{
-			log.error("Error while reading file : " + fileName, e);
+			log.error("Error while reading file : " + file, e);
 			return null;
 		}
 

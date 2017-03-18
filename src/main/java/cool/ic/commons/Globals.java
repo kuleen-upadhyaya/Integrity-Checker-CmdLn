@@ -16,7 +16,7 @@ public class Globals
 	public static long processedFileSize;
 	public static long totalFileSizeMB;
 	
-	public static Timer progressTimer = new Timer(1000, new ActionListener()
+	public static Timer progressTimer = new Timer(30, new ActionListener()
 	{
 		public void actionPerformed(ActionEvent arg0) 
 		{
