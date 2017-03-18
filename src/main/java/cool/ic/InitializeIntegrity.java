@@ -11,10 +11,10 @@ import cool.ic.Files.FileLister;
 import cool.ic.beans.FileStatistics;
 import cool.ic.beans.IntegrityDBDetails;
 import cool.ic.checksum.CheckSum;
+import cool.ic.commons.Globals;
+import cool.ic.commons.Utils;
 import cool.ic.db.IntegrityDB;
 import cool.ic.init.InitializationProperties;
-import cool.ic.progress.ConsoleProgressBar;
-import cool.ic.utils.Commons;
 
 public class InitializeIntegrity 
 {
@@ -53,12 +53,13 @@ public class InitializeIntegrity
 
 		log.info("Starting calculation of file checksum");
 		
-		long processedFileSize=0;
-		int noOfFilesProcessed=0;
-		int totalNoOfFiles = fileSet.size();
+		Globals.progressTimer.start();
+		
+		Globals.processedFileSize = 0;
+		Globals.noOfFilesProcessed = 0;
+		Globals.totalNoOfFiles = fileSet.size();
 		long totalFileSize = fs.getTotalFileSize();
-		long totalFileSizeMB = Commons.toMB(totalFileSize);
-		int percentage = 0;
+		Globals.totalFileSizeMB = Utils.toMB(totalFileSize);
 		
 		for(File file : fileSet)
 		{
@@ -83,24 +84,24 @@ public class InitializeIntegrity
 				}
 			}
 			
-			noOfFilesProcessed++;
-			processedFileSize += file.length();
+			Globals.noOfFilesProcessed++;
+			Globals.processedFileSize += file.length();
 			
-			percentage = (int) (processedFileSize * 100 / totalFileSize);
-			ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
+			Globals.overallPers = (int) (Globals.processedFileSize * 100 / totalFileSize);
 		}
 		
 		idb.insertBulk(dbMap);
+		Globals.progressTimer.stop();
 		
-		percentage = (int) (processedFileSize * 100 / totalFileSize);
-		ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
+		Globals.overallPers = (int) (Globals.processedFileSize * 100 / totalFileSize);
+		Globals.indvPers = 100;
+		Globals.showProgressbar();
 		
 		long endTime = System.nanoTime();
 		
-		String totalTimeTaken = Commons.getTimeString(startTime, endTime);
+		String totalTimeTaken = Utils.getTimeString(startTime, endTime);
 		
 		log.info(totalTimeTaken);
 		System.out.println("\n\n" + totalTimeTaken);
 	}
-
 }

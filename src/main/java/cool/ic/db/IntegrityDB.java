@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 
 import cool.ic.beans.IntegrityDBDetails;
-import cool.ic.utils.Commons;
+import cool.ic.commons.Utils;
 
 public class IntegrityDB 
 {
@@ -140,7 +140,7 @@ public class IntegrityDB
 		} 
 		catch (SQLException e) 
 		{
-			Commons.logErrAndExit(log, "Error creating statement", e);
+			Utils.logErrAndExit(log, "Error creating statement", e);
 		}
 		
 		ResultSet rs = null;
@@ -150,7 +150,7 @@ public class IntegrityDB
 		} 
 		catch (SQLException e) 
 		{
-			Commons.logErrAndExit(log, "Error while execuiting query", e);
+			Utils.logErrAndExit(log, "Error while execuiting query", e);
 		}
 		
 		try 
@@ -167,7 +167,7 @@ public class IntegrityDB
 		} 
 		catch (SQLException e) 
 		{
-			Commons.logErrAndExit(log, "Error while iterating result set", e);
+			Utils.logErrAndExit(log, "Error while iterating result set", e);
 		}
 		
 		try 

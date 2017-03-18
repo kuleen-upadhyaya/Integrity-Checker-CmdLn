@@ -12,9 +12,9 @@ import cool.ic.Files.FileLister;
 import cool.ic.beans.FileStatistics;
 import cool.ic.beans.IntegrityDBDetails;
 import cool.ic.checksum.CheckSum;
+import cool.ic.commons.Globals;
+import cool.ic.commons.Utils;
 import cool.ic.db.IntegrityDB;
-import cool.ic.progress.ConsoleProgressBar;
-import cool.ic.utils.Commons;
 
 public class IntegrityVerifier 
 {
@@ -63,7 +63,7 @@ public class IntegrityVerifier
 		
 		long endTime = System.nanoTime();
 		
-		String totalTimeTaken = Commons.getTimeString(startTime, endTime);
+		String totalTimeTaken = Utils.getTimeString(startTime, endTime);
 		
 		log.info(totalTimeTaken);
 		System.out.println("\n\n" + totalTimeTaken);
@@ -81,12 +81,14 @@ public class IntegrityVerifier
 		dbSet.removeAll(deletedFilesFromFileSystem);
 		dbSet.removeAll(newFilesInFileSystem);
 		
-		long processedFileSize=0;
-		int noOfFilesProcessed=0;
-		int totalNoOfFiles = fileSet.size();
+		Globals.processedFileSize = 0;
+		Globals.noOfFilesProcessed = 0;
+		Globals.totalNoOfFiles = fileSet.size();
 		long totalFileSize = getTotalFileSize(dbMap);
-		long totalFileSizeMB = Commons.toMB(totalFileSize);
-		int percentage = 0;
+		Globals.totalFileSizeMB = Utils.toMB(totalFileSize);
+		
+		Globals.overallPers = 0;
+		Globals.progressTimer.start();
 		
 		for(String fileName : dbSet)
 		{
@@ -99,15 +101,17 @@ public class IntegrityVerifier
 				filesWithDifferentHashValue.add(fileName);
 			}
 			
-			noOfFilesProcessed++;
-			processedFileSize += idb.getFileSize();
+			Globals.noOfFilesProcessed++;
+			Globals.processedFileSize += idb.getFileSize();
 			
-			percentage = (int) (processedFileSize * 100l / totalFileSize);
-			ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
+			Globals.overallPers = (int) (Globals.processedFileSize * 100 / totalFileSize);
 		}
-
-		percentage = (int) (processedFileSize * 100l / totalFileSize);
-		ConsoleProgressBar.showProgress(percentage, noOfFilesProcessed, totalNoOfFiles, Commons.toMB(processedFileSize), totalFileSizeMB);
+		
+		Globals.progressTimer.stop();
+		Globals.overallPers = (int) (Globals.processedFileSize * 100 / totalFileSize);
+		
+		Globals.indvPers = 100;
+		Globals.showProgressbar();
 		
 		return filesWithDifferentHashValue;
 	}

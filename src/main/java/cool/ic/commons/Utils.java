@@ -1,10 +1,10 @@
-package cool.ic.utils;
+package cool.ic.commons;
 
 import org.apache.log4j.Logger;
 
-public class Commons 
+public class Utils 
 {
-	private Commons()
+	private Utils()
 	{
 		
 	}
