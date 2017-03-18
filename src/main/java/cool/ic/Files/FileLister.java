@@ -24,6 +24,8 @@ public final class FileLister
 	
   public static FileStatistics getFileStats()
   {
+	System.out.println("Preparing file list. Please wait ...");
+	
     String rootDir = InitializationProperties.getRoot();
     FileVisitor<Path> fileProcessor = new ProcessFile();
     
@@ -32,12 +34,16 @@ public final class FileLister
     
     try 
     {
+    	
+    	
 		Files.walkFileTree(Paths.get(rootDir), fileProcessor);
 	} 
     catch (IOException e) 
     {
     	log.error("Error while preparing list of files", e);
 	}
+    
+    System.out.println("File list prepared ...\n");
     
     return new FileStatistics(fileSet, totalFileSize);
   }
@@ -62,7 +68,7 @@ public final class FileLister
     @Override
     public FileVisitResult visitFileFailed(Path file, IOException e) throws IOException 
     {
-        System.err.printf("Visiting failed for %s\n", file);
+    	log.error("Visiting failed for :" + file);
         return FileVisitResult.SKIP_SUBTREE;
     }
   }
