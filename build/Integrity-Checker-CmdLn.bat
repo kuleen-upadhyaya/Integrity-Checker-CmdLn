@@ -1,0 +1,1 @@
+java -jar Integrity-Checker-CmdLn.jar
